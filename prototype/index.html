@@ -1,0 +1,125 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>SidelineReel — Roster Tag Review</title>
+<style>
+:root{--bg:#0b1220;--card:#152238;--line:#243554;--acc:#3b82f6;--ok:#22c55e;--warn:#f59e0b;--bad:#ef4444;--tx:#e8eefc;--mut:#93a4c3}
+*{box-sizing:border-box}body{margin:0;font-family:Inter,system-ui,sans-serif;background:var(--bg);color:var(--tx)}
+header{padding:14px 18px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;background:#0a101c}
+h1{margin:0;font-size:18px}h1 span{color:var(--acc)}.pill{font-size:12px;padding:4px 10px;border-radius:999px;background:#1e3a5f;color:#bfdbfe}
+main{max-width:1100px;margin:0 auto;padding:18px;display:grid;grid-template-columns:1.1fr .9fr;gap:16px}
+@media(max-width:860px){main{grid-template-columns:1fr}}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px}
+.mut{color:var(--mut);font-size:13px}.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.btn{border:1px solid var(--line);background:#101a2e;color:var(--tx);padding:9px 12px;border-radius:10px;cursor:pointer;font-weight:600}
+.btn.pri{background:var(--acc);border-color:var(--acc);color:#fff}.btn.ok{background:var(--ok);border-color:var(--ok);color:#052e16}
+.btn.warn{background:#3a2a10;border-color:var(--warn);color:#fde68a}.btn:disabled{opacity:.45;cursor:not-allowed}
+.stage{aspect-ratio:16/10;border-radius:12px;background:linear-gradient(160deg,#14532d,#052e16 55%,#0f172a);display:flex;flex-direction:column;justify-content:flex-end;padding:14px;position:relative;overflow:hidden}
+.jersey{position:absolute;left:18%;top:28%;width:86px;height:100px;border-radius:10px;background:#fff;color:#0f172a;display:flex;flex-direction:column;align-items:center;justify-content:center;font-weight:800;box-shadow:0 10px 30px rgba(0,0,0,.35)}
+.jersey .n{font-size:42px;line-height:1}.jersey .t{font-size:11px;letter-spacing:.08em}
+.badge{position:absolute;top:12px;left:12px;background:rgba(0,0,0,.55);padding:6px 10px;border-radius:8px;font-size:12px}
+.queue{display:flex;flex-direction:column;gap:10px}.item{border:1px solid var(--line);border-radius:12px;padding:10px;cursor:pointer;background:#101a2e}
+.item.on{border-color:var(--acc);box-shadow:0 0 0 1px var(--acc)}.item.done{opacity:.7}
+.tag{font-size:11px;padding:2px 8px;border-radius:999px;font-weight:700}
+.tag.risk{background:#3f1d1d;color:#fecaca}.tag.amb{background:#3a2a10;color:#fde68a}.tag.ok{background:#14301f;color:#bbf7d0}
+.choices{display:grid;gap:8px;margin-top:10px}.choice{display:flex;justify-content:space-between;gap:8px;align-items:center;padding:10px;border:1px solid var(--line);border-radius:10px;background:#0d1628}
+.choice:hover{border-color:#3b82f6}footer{text-align:center;padding:18px;color:var(--mut);font-size:13px}a{color:#93c5fd}
+.toast{position:fixed;bottom:18px;left:50%;transform:translateX(-50%);background:var(--ok);color:#052e16;padding:10px 14px;border-radius:10px;font-weight:700;display:none}
+.meter{height:8px;background:#1e293b;border-radius:999px;overflow:hidden;margin-top:8px}.meter>div{height:100%;background:var(--ok);width:0%;transition:width .3s}
+</style>
+</head>
+<body>
+<header>
+  <h1>Sideline<span>Reel</span> · Roster Tag Review</h1>
+  <div class="row"><span class="pill">Harbor Hawks U12 · vs Bayside FC</span><span class="pill" id="progress">0 / 3 resolved</span></div>
+</header>
+<main>
+  <section class="card">
+    <div class="row" style="justify-content:space-between;margin-bottom:10px">
+      <div><b id="title">Ambiguous jersey match</b><div class="mut" id="sub">Review before this clip lands in a personal reel</div></div>
+      <span class="tag risk" id="sev">HIGH RISK</span>
+    </div>
+    <div class="stage">
+      <div class="badge" id="badge">Auto-tag confidence 41%</div>
+      <div class="jersey" id="jersey"><div class="t">DETECTED</div><div class="n" id="jn">14</div></div>
+      <div class="mut" style="color:#d1fae5">Clip · 52' · goal celebration · OCR read similar digits</div>
+    </div>
+    <p class="mut" style="margin:12px 0 4px" id="why">Model proposed #4 (Noah Patel) but OCR also matches #14 (Ava Reyes). Similar digits caused a wrong-kid reel last week at Ridgeline.</p>
+    <div class="choices" id="choices"></div>
+    <div class="row" style="margin-top:12px">
+      <button class="btn ok" id="confirm" onclick="confirmPick()">Confirm tag &amp; update reel</button>
+      <button class="btn warn" onclick="skipClip()">Hold clip out of reels</button>
+    </div>
+    <div class="meter"><div id="bar"></div></div>
+    <p class="mut" id="status">Select the correct roster player for this clip.</p>
+  </section>
+  <aside class="card">
+    <b>Review queue</b>
+    <p class="mut">Only ambiguous jersey matches (lookalikes / swapped digits). Clear tags auto-publish.</p>
+    <div class="queue" id="queue"></div>
+    <div class="card" style="margin-top:12px;background:#0d1628">
+      <b>After confirm</b>
+      <p class="mut" id="preview">Correct kid gets the clip in their personal reel; wrong candidate is removed; family thumbnail regenerates.</p>
+      <button class="btn pri" style="width:100%;margin-top:8px" onclick="showReel()">Open corrected personal reel →</button>
+    </div>
+  </aside>
+</main>
+<section class="card hide" id="reelCard" style="max-width:1100px;margin:0 auto 20px;display:none">
+  <b>Personal reel preview · <span id="reelName">—</span></b>
+  <p class="mut" id="reelNote"></p>
+  <div class="stage" style="aspect-ratio:21/9;margin-top:8px"><div class="jersey" style="left:42%;top:20%"><div class="t">CORRECT</div><div class="n" id="rn">14</div></div>
+  <div style="color:#d1fae5">Highlights now match this jersey only</div></div>
+</section>
+<footer>Working prototype for the <a href="https://ajaia.ai" target="_blank" rel="noopener">Ajaia</a> Product Manager assessment · SidelineReel roster tagging · Bikram Laishram</footer>
+<div class="toast" id="toast"></div>
+<script>
+const items=[
+  {id:1,sev:'HIGH RISK',conf:41,detected:'14',wrong:{num:4,name:'Noah Patel',pos:'DF'},right:{num:14,name:'Ava Reyes',pos:'FW'},why:'OCR collapsed 14→4 (missing stem). Ridgeline filed the same class of bug this week.',clip:"52' goal celebration"},
+  {id:2,sev:'AMBIGUOUS',conf:53,detected:'11',wrong:{num:1,name:'Sofia Novak',pos:'GK'},right:{num:11,name:'Zara Ahmed',pos:'FW'},why:'Leading 1 vs 11 lookalike. Cobblestone ticket: #1 reel contained #11 clip.',clip:"28' shot on target"},
+  {id:3,sev:'AMBIGUOUS',conf:48,detected:'7',wrong:{num:17,name:'Miles Cho',pos:'MF'},right:{num:7,name:'Aiden Ruiz',pos:'FW'},why:'Swapped/extra digit pattern (Brightwater lacrosse). Hold human check when distance < threshold.',clip:"60' penalty"}
+];
+let i=0, pick=null, done=new Set();
+const $=id=>document.getElementById(id);
+function toast(m){const t=$('toast');t.textContent=m;t.style.display='block';setTimeout(()=>t.style.display='none',2200)}
+function renderQueue(){
+  $('queue').innerHTML=items.map((x,idx)=>`<div class="item ${idx===i?'on':''} ${done.has(x.id)?'done':''}" onclick="jump(${idx})">
+    <div class="row" style="justify-content:space-between"><b>Clip ${idx+1} · ${x.clip}</b><span class="tag ${x.sev==='HIGH RISK'?'risk':'amb'}">${x.sev}</span></div>
+    <div class="mut">Detected jersey ${x.detected} · conf ${x.conf}%</div></div>`).join('');
+  $('progress').textContent=`${done.size} / ${items.length} resolved`;
+  $('bar').style.width=(done.size/items.length*100)+'%';
+}
+function load(){
+  const x=items[i]; pick=null;
+  $('title').textContent=`Ambiguous jersey match · #${x.detected}`;
+  $('sub').textContent=x.clip+' · review before publish to personal reel / auto-recap thumbnail';
+  $('sev').textContent=x.sev; $('sev').className='tag '+(x.sev==='HIGH RISK'?'risk':'amb');
+  $('badge').textContent=`Auto-tag confidence ${x.conf}%`;
+  $('jn').textContent=x.detected; $('why').textContent=x.why;
+  const opts=[x.wrong,x.right].sort(()=>Math.random()-0.5);
+  $('choices').innerHTML=opts.map(o=>`<button class="choice" data-num="${o.num}" onclick="select(${o.num})"><span><b>#${o.num} ${o.name}</b><div class="mut">${o.pos} · roster</div></span><span class="mut">Select</span></button>`).join('');
+  $('status').textContent='Select the correct roster player for this clip.';
+  $('reelCard').style.display='none';
+  renderQueue();
+}
+function select(num){pick=num; [...$('choices').children].forEach(c=>{c.style.borderColor=Number(c.dataset.num)===num?'#3b82f6':''})}
+function confirmPick(){
+  const x=items[i]; if(pick==null){toast('Pick a roster player first');return}
+  const ok=pick===x.right.num; done.add(x.id);
+  $('status').textContent=ok?`Tagged #${x.right.num} ${x.right.name}. Wrong candidate removed from reel.`:`Tagged #${pick}. (Demo note: correct was #${x.right.num} — acceptance tests catch this.)`;
+  toast(ok?'Roster tag confirmed ✓':'Tag saved — QA would flag mismatch');
+  $('reelName').textContent=`#${pick}`;
+  $('rn').textContent=String(pick);
+  $('reelNote').textContent=`Personal reel + weekly recap thumbnail now use jersey #${pick} only.`;
+  renderQueue();
+  if(done.size===items.length) toast('Queue clear — ambiguous tags resolved');
+  else setTimeout(()=>{i=items.findIndex(t=>!done.has(t.id)); if(i<0)i=0; load()},700);
+}
+function skipClip(){const x=items[i]; done.add(x.id); toast('Clip held out of reels'); renderQueue(); i=items.findIndex(t=>!done.has(t.id)); if(i<0)i=0; load()}
+function jump(idx){i=idx; load()}
+function showReel(){if(pick==null&&!done.has(items[i].id)){toast('Confirm a tag first');return}$('reelCard').style.display='block'; $('reelCard').scrollIntoView({behavior:'smooth'})}
+load();
+</script>
+</body>
+</html>
