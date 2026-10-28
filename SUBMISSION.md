@@ -1,7 +1,7 @@
 # Ajaia Product Manager Assessment — SidelineReel
 **Candidate:** Bikram Laishram  
 **Email:** high.sailor@gmail.com  
-**Video:** https://github.com/bikramlaishram/job-application-assets/raw/main/docs/video/ajaia_Ajaia_SidelineReel_PM_walkthrough.mp4  
+**Video:** https://raw.githubusercontent.com/bikramlaishram/job-application-assets/main/docs/video/ajaia_Ajaia_SidelineReel_PM_walkthrough.mp4  
 **Working prototype:** https://bikramlaishram.github.io/job-application-assets/sidelinereel/  
 **Resume:** https://raw.githubusercontent.com/bikramlaishram/job-application-assets/main/Bikram_Laishram_AI_Native_PM_CV.pdf  
 **Shipped work:** https://github.com/bikramlaishram · https://github.com/acuitygen · LinkedIn https://www.linkedin.com/in/bikramlaishram  
